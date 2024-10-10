@@ -22,6 +22,7 @@ calculate_net <- function(dt, col, by, o = "fromdist", d = "todist",
     dt_out <- dt[, .(outflow = sum(get(col))), keyby = c(o, by)]
     dt_in[dt_out, outflow := i.outflow, on = c(stats::setNames(o, d), by)]
     dt_in[, net := inflow - outflow]
+    dt_in[, total := inflow + outflow]
     data.table::setnames(dt_in, d, "region")
     if(!is.null(type)) {
         dt_in[, type := type]
