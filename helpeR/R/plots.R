@@ -90,6 +90,7 @@ plot_fit <- function(dt, x, y, th_min, smooth = TRUE, th_max = NULL, p_sample = 
 ##' @param ... arguments passed to ggplot2
 ##' @return NULL
 ##' @importFrom ggplot2 ggsave
+##' @export ggsavew
 ##' @author Konstantin Hoffie
 ggsavew <- function(w = 8, ...) {
     w <- w
