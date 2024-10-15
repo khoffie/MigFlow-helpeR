@@ -17,7 +17,7 @@
 ##' @author Konstantin Hoffie
 calculate_net <- function(dt, col, by, o = "fromdist", d = "todist",
                           long = FALSE, type = NULL) {
-    outflow <- i.outflow <- inflow <- . <- net <- NULL
+    outflow <- i.outflow <- inflow <- . <- net <- total <- NULL
     dt_in <- dt[, .(inflow = sum(get(col))), keyby = c(d, by)]
     dt_out <- dt[, .(outflow = sum(get(col))), keyby = c(o, by)]
     dt_in[dt_out, outflow := i.outflow, on = c(stats::setNames(o, d), by)]
