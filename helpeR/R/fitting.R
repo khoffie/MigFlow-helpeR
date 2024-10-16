@@ -8,12 +8,12 @@
 ##' @author Konstantin Hoffie
 fit_gravity <- function(dt, offset) {
     if(offset == TRUE) {
-        fit <- stats::glm(actual ~ offset(log(frompop)) +
+        fit <- stats::glm(flows ~ offset(log(frompop)) +
                        offset(log(topop)) + log(distance),
                    family = stats::poisson, data = dt)
     }
     if(offset == FALSE) {
-        fit <- stats::glm(actual ~ log(frompop) +
+        fit <- stats::glm(flows ~ log(frompop) +
                        log(topop) + log(distance),
                    family = stats::poisson, data = dt)
     }
