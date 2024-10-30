@@ -24,6 +24,7 @@ render_doc <- function(path, file = "index.Rmd", pdf = TRUE, toc = TRUE, rm_main
 }
 
 render_rmd <- function(path, file, pdf, toc, rm_main) {
+    ## better to specify delete_merged_file: true
         if (rm_main == TRUE) {
             if (base::file.exists(file.path(path, "_main.Rmd"))) {
                 base::file.remove(file.path(path, "_main.Rmd"))

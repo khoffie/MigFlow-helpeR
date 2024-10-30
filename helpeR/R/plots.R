@@ -58,7 +58,7 @@ plot_fit <- function(dt, x, y, th_min, smooth = TRUE, th_max = NULL, p_sample = 
         dt <- dt[sample(1:.N, size = as.integer(p_sample * .N))]
         main <- sprintf("%s percent sample of individual flows", p_sample * 100)
     }
-    main <- sprintf(paste(main, "for preds > %s"), th_min)
+##    main <- sprintf(paste(main, "for preds > %s"), th_min)
     plt <- ggplot(dt[preds > th_min], aes({{x}}, {{y}})) +
         geom_hline(yintercept = 0) +
         geom_point(pch = ".", alpha = .3) +
