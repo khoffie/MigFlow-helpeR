@@ -13,6 +13,7 @@
 render_doc <- function(path, file = "index.Rmd", pdf = TRUE, toc = TRUE, rm_main = TRUE) {
     ### not so clever because no objects in global environment created
     old_path <- getwd()
+    on.exit(setwd(old_path))
     setwd(path)
     if(grepl(".Rmd", file)) {
         render_rmd(path, file, pdf, toc, rm_main)
@@ -20,7 +21,6 @@ render_doc <- function(path, file = "index.Rmd", pdf = TRUE, toc = TRUE, rm_main
     if(grepl(".tex", file)) {
         render_tex(path, file)
     }
-    on.exit(setwd(old_path))
 }
 
 render_rmd <- function(path, file, pdf, toc, rm_main) {
