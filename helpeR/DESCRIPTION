@@ -15,4 +15,6 @@ Imports:
     ggplot2,
     tinytex,
     bookdown,
-    sf
+    sf,
+    patchwork, ## for report
+    kableExtra ## for report
