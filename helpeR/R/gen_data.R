@@ -34,7 +34,6 @@ gen_data <- function(dist_type = c("centroid", "pos")) {
     fwrite(districts, "./data/districts.csv")
 
     message("Data written to disk.")
-    return(NULL)
 }
 
 read_age <- function(file) {
