@@ -144,3 +144,25 @@ cut_qs <- function(x, num_quantiles = NULL, probs = cut_probs(), labels = NULL, 
 ##     y <- 1 / (1 + exp(-x))
 ##     return(y)
 ## }
+
+##' Looks in data.table for "geometry" column and uses it to create
+##' simple features object.
+##'
+##' @title set geometry attribute in data.table
+##' @param dt data.table with geometry attribute in column called
+##'     "geometry"
+##' @param geom_only If true all columns are dropped and only geometry
+##'     set is returned.
+##' @return If geom_only = FALSE, object of class("sf",
+##'     "data.table"). If geom_only == TRUE, class("sfc")
+##' @import sf
+##' @export set_geom
+##' @author Konstantin
+set_geom <- function(dt, geom_only = FALSE) {
+    geometry <- NULL
+    dtgeom <- sf::st_set_geometry(dt, dt[, geometry])
+    if (geom_only == TRUE) {
+        dtgeom <- sf::st_geometry(dtgeom)
+    }
+    return(dtgeom)
+}
