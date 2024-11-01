@@ -16,5 +16,5 @@ Imports:
     tinytex,
     bookdown,
     sf,
-    patchwork, ## for report
-    kableExtra ## for report
+    patchwork, 
+    kableExtra 
