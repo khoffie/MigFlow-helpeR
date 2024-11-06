@@ -12,6 +12,7 @@ correct_flows <- function(f, c) {
     ## destination. Probably they are coded wrongly. For now, I simply
     ## remove them.
 
+    origin <- . <- destination <- age_group <- NULL
     f <- f[! f[year == 2001 & origin %in% c(3201, 3253)],
                    on = .(origin, destination, year, age_group)]
     f <- f[, correct_flows_(.SD, c[year == .BY$year]), keyby = .(year, age_group)]
