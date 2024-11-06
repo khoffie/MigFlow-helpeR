@@ -2,6 +2,7 @@
 
 export(add_missing_flows)
 export(calculate_net)
+export(correct_flows)
 export(create_design_mat)
 export(cut_probs)
 export(cut_qs)

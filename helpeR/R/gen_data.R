@@ -24,8 +24,9 @@ gen_data <- function(dist_type = c("centroid", "pos")) {
     shp <- setDT(sf::read_sf(file.path(p_raw, "/shapes/districts_ext.shp")))
     density <- data.table::fread(file.path(p_raw, "density.csv"))[
                              , .(region, year, density, bl_ags)]
+    correct <- data.table::fread(file.path(p_raw, "correct.csv"))
 
-    flows <- clean_flows(flows, age_for)
+    flows <- clean_flows(flows, correct, age_for)
     districts <- gen_coords_dt(shp, age_for, density, type = type)
     check_tables(flows, districts)
     calculate_distances(flows, districts)
@@ -43,9 +44,18 @@ read_age <- function(file) {
     return(dt)
 }
 
-clean_flows <- function(flows, age_dt) {
+clean_flows <- function(flows, correct, age_dt) {
     age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
     todist <- frompop <- i.german <- region <- topop <- agegroup <- NULL
+    ## according correct.csv 3201 and 3253 did not exist in 2001
+    ## anymore. In flows they only appear as origin, not as
+    ## destination. Probably they are coded wrongly. For now, I simply
+    ## remove them.
+    flows <- flows[! flows[year == 2001 & origin %in% c(3201, 3253)],
+                   on = .(origin, destination, year, age_group)]
+    flows <- flows[, correct_flows(.SD, correct[year == .BY$year]), keyby = .(year, age_group)]
+    flows[, origin := as.integer(origin)]
+    flows[, destination := as.integer(as.character(destination))]
 
     flows <- flows[year == 2017 & age_group != "all", 
                .(fromdist = origin, todist = destination, year,
