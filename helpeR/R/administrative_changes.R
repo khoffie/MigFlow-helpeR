@@ -7,6 +7,20 @@
 ##' @return data.table
 ##' @author Konstantin Hoffie
 correct_flows <- function(f, c) {
+    ## according correct.csv 3201 and 3253 did not exist in 2001
+    ## anymore. In flows they only appear as origin, not as
+    ## destination. Probably they are coded wrongly. For now, I simply
+    ## remove them.
+
+    f <- f[! f[year == 2001 & origin %in% c(3201, 3253)],
+                   on = .(origin, destination, year, age_group)]
+    f <- f[, correct_flows_(.SD, c[year == .BY$year]), keyby = .(year, age_group)]
+    f[, origin := as.integer(origin)]
+    f[, destination := as.integer(as.character(destination))]
+    return(f)
+}
+
+correct_flows_ <- function(f, c) {
     ags_old <- flow <- NULL
     ## if speed is an issue, the following 5 lines should be moved outside the function
     fm <- data.table::dcast(f, origin ~ destination, value.var = "flow", fill = 0)
@@ -22,4 +36,3 @@ correct_flows <- function(f, c) {
     fnew[, flow := as.integer(round(flow))]
     return(fnew)
 }
-

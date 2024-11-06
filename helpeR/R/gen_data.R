@@ -47,22 +47,15 @@ read_age <- function(file) {
 clean_flows <- function(flows, correct, age_dt) {
     age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
     todist <- frompop <- i.german <- region <- topop <- agegroup <- NULL
-    ## according correct.csv 3201 and 3253 did not exist in 2001
-    ## anymore. In flows they only appear as origin, not as
-    ## destination. Probably they are coded wrongly. For now, I simply
-    ## remove them.
-    flows <- flows[! flows[year == 2001 & origin %in% c(3201, 3253)],
-                   on = .(origin, destination, year, age_group)]
-    flows <- flows[, correct_flows(.SD, correct[year == .BY$year]), keyby = .(year, age_group)]
-    flows[, origin := as.integer(origin)]
-    flows[, destination := as.integer(as.character(destination))]
 
+    flows <- correct_flows(flows, correct)
+    
     flows <- flows[year == 2017 & age_group != "all", 
                .(fromdist = origin, todist = destination, year,
                  agegroup = age_group, flows = flow)]
     rec_ages(flows)
-    flows <- helpeR::add_missing_flows(flows, flows[, unique(fromdist)],
-                              flows[, unique(agegroup)], flows[, unique(year)])
+    flows <- add_missing_flows(flows, flows[, unique(fromdist)],
+                               flows[, unique(agegroup)], flows[, unique(year)])
     ### omitting since all intra-district flows are 0 and this would be
     ### hard to explain for the model
     flows <- flows[fromdist != todist]
