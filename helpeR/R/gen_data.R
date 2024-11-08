@@ -51,7 +51,7 @@ clean_flows <- function(flows, correct, age_dt) {
     ## in correct_flows we remove year == 2001 and origin %in% c(3201, 3253)
     flows <- correct_flows(flows, correct)
     
-    flows <- flows[year == 2017 & age_group != "all", 
+    flows <- flows[age_group != "all", 
                .(fromdist = origin, todist = destination, year,
                  agegroup = age_group, flows = flow)]
     rec_ages(flows)
