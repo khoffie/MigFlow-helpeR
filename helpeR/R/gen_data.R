@@ -14,19 +14,19 @@
 ##' @import sf
 ##' @export gen_data
 ##' @author Konstantin
-gen_data <- function(dist_type = c("centroid", "pos")) {
+gen_data <- function(year_min, year_max, dist_type = c("centroid", "pos")) {
     . <- region <- bl_ags <- NULL
     type <- match.arg(dist_type)
     
     p_raw <- "./data/raw"    
     flows <- fread(file.path(p_raw, "flows_districts_2000_2017_ger.csv"))
-    age_for <- read_age(file.path(p_raw, "age17for.csv"))
+    age_for <- read_age(file.path(p_raw, "agefor.csv"))
     shp <- setDT(sf::read_sf(file.path(p_raw, "/shapes/districts_ext.shp")))
     density <- data.table::fread(file.path(p_raw, "density.csv"))[
                              , .(region, year, density, bl_ags)]
     correct <- data.table::fread(file.path(p_raw, "correct.csv"))
 
-    flows <- clean_flows(flows, correct, age_for)
+    flows <- clean_flows(flows, correct, age_for, year_min, year_max)
     districts <- gen_coords_dt(shp, age_for, density, type = type)
     check_tables(flows, districts)
     calculate_distances(flows, districts)
@@ -44,14 +44,14 @@ read_age <- function(file) {
     return(dt)
 }
 
-clean_flows <- function(flows, correct, age_dt) {
+clean_flows <- function(flows, correct, age_dt, year_min, year_max) {
     age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
     todist <- frompop <- i.german <- region <- topop <- agegroup <- NULL
 
     ## in correct_flows we remove year == 2001 and origin %in% c(3201, 3253)
     flows <- correct_flows(flows, correct)
     
-    flows <- flows[age_group != "all", 
+    flows <- flows[year >= year_min & year <= year_max & age_group != "all", 
                .(fromdist = origin, todist = destination, year,
                  agegroup = age_group, flows = flow)]
     rec_ages(flows)
