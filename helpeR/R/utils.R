@@ -55,7 +55,7 @@ calculate_net <- function(dt, col, by, o = "fromdist", d = "todist",
 ##' @author Konstantin Hoffie
 rec_ages <- function(dt) {
   agegroup <- i.new <- . <- old <- NULL
-  lbls <- data.table::data.table(old = c("unter18", "über65"),
+  lbls <- data.table::data.table(old = c("unter18", "\u00fcber65"),
                      new = c("below18", "above65"))
   dt[lbls, agegroup := i.new, on = .(agegroup = old)]
   return(NULL)
