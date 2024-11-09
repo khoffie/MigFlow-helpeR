@@ -1,5 +1,7 @@
 ##' Cleans German population data 
 ##'
+##' @param raw raw data path
+##' @param clean clean data path
 ##' @return NULL, writes to disk
 ##' @import data.table
 ##' @import sf
