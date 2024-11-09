@@ -20,13 +20,14 @@ gen_data <- function(year_min, year_max, dist_type = c("centroid", "pos")) {
     . <- region <- bl_ags <- NULL
     type <- match.arg(dist_type)
     
-    p_raw <- "./data/raw"    
-    flows <- fread(file.path(p_raw, "flows_districts_2000_2017_ger.csv"))
-    age_for <- read_age(file.path(p_raw, "agefor.csv"))
-    shp <- setDT(sf::read_sf(file.path(p_raw, "/shapes/districts_ext.shp")))
-    density <- data.table::fread(file.path(p_raw, "density.csv"))[
+    p_raw <- "./data/raw"
+    p_clean <- "./data/clean"
+    flows <- fread(file.path(p_clean, "flows_districts_2000_2017_ger.csv"))
+    age_for <- read_age(file.path(p_clean, "germanpop.csv"))
+    shp <- setDT(sf::read_sf(file.path(p_clean, "/shapes/districts_ext.shp")))
+    density <- data.table::fread(file.path(p_clean, "density.csv"))[
                              , .(region, year, density, bl_ags)]
-    correct <- data.table::fread(file.path(p_raw, "correct.csv"))
+    correct <- data.table::fread(file.path(p_clean, "correct.csv"))
 
     flows <- clean_flows(flows, correct, age_for, year_min, year_max)
     districts <- gen_coords_dt(shp, age_for, density, type = type)
