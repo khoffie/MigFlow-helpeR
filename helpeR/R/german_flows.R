@@ -63,13 +63,15 @@ rec_ages__ <- function(dt) {
     dt <- dt[age_group != "AG", ] ## dont know whats up here
     ## only in 2006, seems to be more or less the sum of the other age groups
     dt <- dt[age_group != "insgesamt", ] 
-    dt[, "age_group" := gsub(" ", "", age_group)] ## do in preparation
     old <- c("18 bis unter 25", "25 bis unter 30", "30 bis unter 50",
          "50 bis unter 65", "65 und mehr", "65 und \u00E4lter")
     new <- c("18-25", "25-30", "30-50", "50-65", "\u00FCber65", "\u00FCber65")
     rec <- data.table(old, new)
     dt[rec, age_group := i.new, on = .(age_group = old)]
-
+    dt[, "age_group" := gsub(" ", "", age_group)] ## do in preparation
+    if(dt[, uniqueN(age_group)] != 6) {
+        stop("Number of age groups not 6")
+    }
     return(dt)
 }
 
