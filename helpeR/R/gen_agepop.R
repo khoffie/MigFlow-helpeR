@@ -1,16 +1,14 @@
-## data obtained from https://www.regionalstatistik.de/genesis/online
+gen_agepop <- function(in_file, out_file) {
+    ## data obtained from https://www.regionalstatistik.de/genesis/online
 
-## In general, other sources for population data exists, like
-## INKAR. Many do not differentiate between foreigners and Germans
-## though. This can lead to considerable bias since foreigners are not
-## distributed uniformly across Germany.
-
-cleanup <- function() {
+    ## In general, other sources for population data exists, like
+    ## INKAR. Many do not differentiate between foreigners and Germans
+    ## though. This can lead to considerable bias since foreigners are not
+    ## distributed uniformly across Germany.
     . <- age_group <- new_age <- region <- all_b <- ger_b <- for_b <- NULL
-    shp <- AGS <- i.new_age <- old_age <- NULL
-    file <- file.path("./data/raw", "12411-03-03-4.csv")
-    dt <- fread(file, skip = 6, encoding = "Latin-1", na.strings = c("-", "", " "))
+    i.new_age <- old_age <- NULL
 
+    dt <- fread(in_file, skip = 6, encoding = "Latin-1", na.strings = c("-", "", " "))
     new_cols <- c("year", "region", "region_type", "age_group",
                   "all_b", "all_m", "all_f",
                   "ger_b", "ger_m", "ger_f",
@@ -31,15 +29,13 @@ cleanup <- function() {
     dt[, new_cols[-c(1:4)] := lapply(.SD, as.integer), .SDcols = new_cols[-c(1:4)]]
 
     dt2 <- dt[, .(year, region, age_group, all_b, ger_b, for_b)]
-    dt2 <- dt2[region %in% shp[, AGS]]
+#    dt2 <- dt2[region %in% shp[, AGS]] only take regions also in shapefile. Not sure if necessary
     dt2[rec_age, age_group := i.new_age, on = .(age_group = old_age)]
     dt2 <- dt2[, c("all_b", "ger_b", "for_b") := lapply(.SD, sum),
                keyby = .(year, region, age_group), .SDcols = c("all_b", "ger_b", "for_b")]
     dt2 <- dt2[, .SD[1], keyby = .(year, region, age_group)]
     dt2 <- dt2[, .(region, year, age_group, all = all_b, german = ger_b, foreign = for_b)]
-    fwrite(cleanup(dt2), file.path("./data", "agefor.csv"))
-    return(NULL)
+    fwrite(dt2, out_file)
+    return(dt2)
 }
-
-
 
