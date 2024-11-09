@@ -5,10 +5,10 @@
 ##' @import sf
 ##' @export german_popdata
 ##' @author Konstantin
-german_popdata <- function() {
+german_popdata <- function(raw, clean) {
     . <- region <- age_group <- NULL
-    dt1 <- clean_pop("./data/raw", "12411-03-02-4.csv")
-    dt2 <- clean_pop("./data/raw", "12411-03-03-4.csv")
+    dt1 <- clean_pop(raw,  "12411-03-02-4.csv")
+    dt2 <- clean_pop(raw, "12411-03-03-4.csv")
     ## three years are in both tables and there are slight
     ## differences. Arbitrarily, we use years from last table
     dt <- rbind(dt1[year < 2011], dt2)
@@ -17,7 +17,7 @@ german_popdata <- function() {
     dt[, c(cols) := lapply(.SD, function(x) nafill(x, "nocb")),
        keyby = .(region, age_group), .SDcols = cols]
     message("Missings imputed using constants: Next observation carried backwards.")
-    fwrite(dt, "./data/clean/germanpop.csv")
+    fwrite(dt, file.path(clean, "germanpop.csv"))
     message("germanpop.csv written to disk")
 }
 
