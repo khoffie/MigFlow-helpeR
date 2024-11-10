@@ -14,7 +14,8 @@ correct_flows <- function(f, c) {
 
     origin <- . <- destination <- age_group <- NULL
     f <- f[! f[year == 2001 & origin %in% c(3201, 3253)],
-                   on = .(origin, destination, year, age_group)]
+           on = .(origin, destination, year, age_group)]
+    warning("Removing 3201 and 3253 in year 2001 from flow data, since they can not be found in correction table")
     f <- f[, correct_flows_(.SD, c[year == .BY$year]), keyby = .(year, age_group)]
     f[, origin := as.integer(origin)]
     f[, destination := as.integer(as.character(destination))]

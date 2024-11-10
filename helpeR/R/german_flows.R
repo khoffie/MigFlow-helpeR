@@ -6,7 +6,7 @@
 ##' @import data.table
 ##' @export german_flows
 ##' @author Konstantin
-german_flows <- function(raw, clean) {
+german_flows <- function(raw, cleanfile) {
     origin <- destination <- NULL
     dt <- rbindlist(lapply(file.path(raw, list.files(raw)), fread))
     dt <- duplicated_rows(dt)
@@ -15,9 +15,8 @@ german_flows <- function(raw, clean) {
     dt <- agegroup_all(dt)
     dt <- swap_od(dt)
     dt <- dt[origin != destination]
-    fn <- file.path(clean, "flows_districts_2000_2017_ger.csv")
-    fwrite(dt, fn)
-    message(sprintf("%s written to disk", fn))
+    fwrite(dt, cleanfile)
+    message(sprintf("%s written to disk", cleanfile))
 }
 
 duplicated_rows <- function(dt) {
@@ -32,6 +31,7 @@ duplicated_rows <- function(dt) {
     ## message(show[, .(year)])
     ## message(show[, .(N)])
     dt <- dt[year != 2003] #
+    warning("Year 2003 removed from data due to many data problems, check later.")
     ## Sum over them, albeit from 2003 only very few
     ## duplicatde. Summing assumes all rows, even the dublicated and
     ## even the ones where even the flow is dublicated, are
@@ -60,6 +60,7 @@ fix_ags_berlin_hamburg <- function(dt) {
 }
 
 rec_ages__ <- function(dt) {
+    age_group <- i.new <- . <- NULL
     dt <- dt[age_group != "AG", ] ## dont know whats up here
     ## only in 2006, seems to be more or less the sum of the other age groups
     dt <- dt[age_group != "insgesamt", ] 
