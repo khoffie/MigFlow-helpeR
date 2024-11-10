@@ -97,7 +97,8 @@ gen_districts <- function(density, germanpop, shp, year_min, year_max, dist_type
     dt[germanpop[agegroup == "all"], pop := i.all, on = .(distcode = region, year)]
     message("District pop: Germans + Foreigners")
     helpeR:::gen_coords(shp, dist_type)
-    dt[shp, c("name", "xcoord", "ycoord") := .(i.GEN, i.xcoord, i.ycoord), on = .(distcode = AGS)]
+    nc <- c("name", "xcoord", "ycoord", "bl_ags", "bl_name")
+    dt[shp, c(nc) := .(i.GEN, i.xcoord, i.ycoord, i.bl_ags, i.bl_name), on = .(distcode = AGS)]
     setcolorder(dt, c("distcode", "year", "pop"))
     dt <- dt[year >= year_min & year <= year_max]
     return(dt)
