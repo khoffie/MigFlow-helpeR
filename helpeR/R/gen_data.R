@@ -51,7 +51,7 @@ read_age <- function(file) {
 
 clean_flows <- function(flows, correct, age_dt, year_min, year_max, topop_type) {
     age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
-    todist <- frompop <- i.german <- region <- topop <- agegroup <- NULL
+    todist <- frompop <- i.german <- region <- topop <- agegroup <- i.all <- NULL
     ## in correct_flows we remove year == 2001 and origin %in% c(3201, 3253)
     flows <- correct_flows(flows, correct)
     
@@ -93,10 +93,12 @@ gen_coords <- function(dt, type) {
 }
 
 gen_districts <- function(density, germanpop, shp, year_min, year_max, dist_type) {
+    . <- region <- agegroup <- pop <- i.all <- i.GEN <- i.xcoord <- i.ycoord <- NULL
+    i.bl_ags <- i.bl_name <- AGS <- NULL
     dt <- density[, .(distcode = region, year, density)]
     dt[germanpop[agegroup == "all"], pop := i.all, on = .(distcode = region, year)]
     message("District pop: Germans + Foreigners")
-    helpeR:::gen_coords(shp, dist_type)
+    gen_coords(shp, dist_type)
     nc <- c("name", "xcoord", "ycoord", "bl_ags", "bl_name")
     dt[shp, c(nc) := .(i.GEN, i.xcoord, i.ycoord, i.bl_ags, i.bl_name), on = .(distcode = AGS)]
     setcolorder(dt, c("distcode", "year", "pop"))
@@ -129,6 +131,7 @@ calculate_distances <- function(flows, coords) {
 }
 
 check_codes <- function(f, d) {
+    . <- fromdist <- distcode <- agegroup <- equal <- NULL
     test <- f[, .(equal = setequal(unique(fromdist), d[year == .BY$year, distcode])),
                keyby = .(year, agegroup)]
 ##    on.exit(return(test))

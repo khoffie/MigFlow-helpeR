@@ -1,7 +1,7 @@
 ##' Cleans preprocessed flows and creates one table
 ##'
 ##' @param raw path for raw data
-##' @param clean path for clean data
+##' @param cleanfile file name for clean data
 ##' @return NULL, writes to disk
 ##' @import data.table
 ##' @export german_flows
