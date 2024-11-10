@@ -1,7 +1,3 @@
-## library(data.table)
-## library(sf)
-## library(helpeR)
-
 ##' Generates FlowDatagermans.csv and districts.csv.
 ##'
 ##' @param dist_type character, centroid or pos. If centroid, (xcoord,
@@ -33,7 +29,7 @@ gen_data <- function(year_min, year_max, dist_type = c("centroid", "pos")) {
     districts <- gen_coords_dt(shp, age_for, density, type = type)
     check_tables(flows, districts)
     calculate_distances(flows, districts)
-
+    check_codes(flows, districts)
     fwrite(flows, "./data/FlowDataGermans.csv")
     fwrite(districts, "./data/districts.csv")
 
@@ -121,6 +117,17 @@ calculate_distances <- function(flows, coords) {
     distances[, distance := sqrt((x_from - x_to)^2 + (y_from - y_to)^2)]
     flows[distances, dist := as.integer(round(i.distance)), on = .(fromdist, todist)]
     return(NULL)
+}
+
+check_codes <- function(f, d) {
+    test <- f[, .(equal = setequal(unique(fromdist), d[year == .BY$year, distcode])),
+               keyby = .(year, agegroup)]
+    on.exit(return(test))
+    if(any(test[, ! equal])) {
+        stop("District codes not matched across tables")
+    } else {
+        message("District codes matched across tables for all years.")
+    }
 }
 
 ## pop_weighted_distance <- function(districts, municipalities_path, inkar_path) {
