@@ -122,7 +122,7 @@ calculate_distances <- function(flows, coords) {
 check_codes <- function(f, d) {
     test <- f[, .(equal = setequal(unique(fromdist), d[year == .BY$year, distcode])),
                keyby = .(year, agegroup)]
-    on.exit(return(test))
+##    on.exit(return(test))
     if(any(test[, ! equal])) {
         stop("District codes not matched across tables")
     } else {
