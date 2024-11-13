@@ -71,10 +71,12 @@ clean_flows <- function(flows, correct, age_dt, year_min, year_max, topop_type) 
     if(topop_type == "agegroup") {
         flows[age_dt, topop := i.all,
               on = .(todist = region, year, agegroup)]
+        message("Topop: Population in age group")
     }
     if(topop_type == "all") {
         flows[age_dt[agegroup == "all"], topop := i.all,
               on = .(todist = region, year)]
+        message("Topop: Total population")
     }
     return(flows)
 }
