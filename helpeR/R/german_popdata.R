@@ -14,7 +14,12 @@ german_popdata <- function(raw, clean) {
     ## three years are in both tables and there are slight
     ## differences. Arbitrarily, we use years from last table
     dt <- rbind(dt1[year < 2011], dt2)
-    ## there are some missings and as a simple imputation, we use the last observation to fill missings
+    ## there are some missings and as a simple imputation, we use the
+    ## last observation to fill missings Still missings remain in
+    ## newer years, that do not have an observation that could be
+    ## carried backwards. This does not concern us, however, since we
+    ## only use data up to and including 2017, where all missings are
+    ## filled.
     cols <- c("all", "german", "foreign")
     dt[, c(cols) := lapply(.SD, function(x) nafill(x, "nocb")),
        keyby = .(region, age_group), .SDcols = cols]
