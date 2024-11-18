@@ -20,6 +20,7 @@ preprocess_germanflows <- function(raw, clean) {
         fwrite(kws, file.path(clean, paste0(dir, ".csv")), quote = TRUE)
         message(sprintf("file %s written to disk", dir))
     }
+    message("German flows successfully preprocessed")
     return(NULL)
 }
 

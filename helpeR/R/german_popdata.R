@@ -87,9 +87,19 @@ read_pop <- function(path, file) {
     ## first linenumbers not part of data
     cond <- ifelse(file == "12411-03-02-4.csv", "184005", "153877")
     cond <- sprintf("Stopped early on line %s", cond)
-    dt <- withCallingHandlers({
-        read_pop_(path, file)
-    }, warning = function(w) {
+    ## at some line the data ends and additional informatino are
+    ## written in the .csv. We do not want to read those and catch the
+    ## warning Stopped early on line ..., such that future users are
+    ## not worried. The problem is however, that users may download
+    ## slighty different data from here:
+    ## https://www.regionalstatistik.de/genesis/online, for example
+    ## data with less (or more) years that nevertheless capture 2000 -
+    ## 2017. Then the file ends at a different line. Sadly the webpage
+    ## is quite complicated so it is easy to download different
+    ## data. Best to just provide the data for users.
+    
+    dt <- withCallingHandlers({ read_pop_(path, file) }, warning =
+        function(w) {
         ## data ends there and only meta information follows
         if (grepl(cond, conditionMessage(w))) {
             invokeRestart("muffleWarning")
