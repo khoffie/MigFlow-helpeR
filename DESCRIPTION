@@ -17,7 +17,6 @@ Imports:
     bookdown,
     sf,
     patchwork,
-    kableExtra,
     ggthemes,
     ggtext,
     readxl
