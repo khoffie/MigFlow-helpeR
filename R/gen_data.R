@@ -17,131 +17,131 @@
 gen_data <- function(year_min, year_max,
                      dist_type = c("centroid", "pos"),
                      topop_type = c("agegroup", "all")) {
-    . <- region <- bl_ags <- NULL
-    dist_type <- match.arg(dist_type)
-    topop_type <- match.arg(topop_type)
-    
-    p_raw <- "./data/raw"
-    p_clean <- "./data/clean"
-    flows <- fread(file.path(p_clean, "flows_districts_2000_2017_ger.csv"))
-    germanpop <- read_age(file.path(p_clean, "germanpop.csv"))
-    shp <- setDT(sf::read_sf(file.path(p_clean, "/shapes/districts_ext.shp")))
-    density <- data.table::fread(file.path(p_clean, "density.csv"))[
-                             , .(region, year, density, bl_ags)]
-    correct <- data.table::fread(file.path(p_clean, "correct.csv"))
+  . <- region <- bl_ags <- NULL
+  dist_type <- match.arg(dist_type)
+  topop_type <- match.arg(topop_type)
 
-    flows <- clean_flows(flows, correct, germanpop, year_min, year_max, topop_type)
-    districts <- gen_districts(density, germanpop, shp, year_min, year_max,
-                               dist_type = dist_type)
+  p_raw <- "./data/raw"
+  p_clean <- "./data/clean"
+  flows <- fread(file.path(p_clean, "flows_districts_2000_2017_ger.csv"))
+  germanpop <- read_age(file.path(p_clean, "germanpop.csv"))
+  shp <- setDT(sf::read_sf(file.path(p_clean, "/shapes/districts_ext.shp")))
+  density <- data.table::fread(file.path(p_clean, "density.csv"))[
+                         , .(region, year, density, bl_ags)]
+  correct <- data.table::fread(file.path(p_clean, "correct.csv"))
 
-    check_tables(flows, districts)
-    calculate_distances(flows, districts)
-    check_codes(flows, districts)
-    fwrite(flows, "./data/FlowDataGermans.csv")
-    fwrite(districts, "./data/districts.csv")
-    message("Data written to disk.")
+  flows <- clean_flows(flows, correct, germanpop, year_min, year_max, topop_type)
+  districts <- gen_districts(density, germanpop, shp, year_min, year_max,
+                             dist_type = dist_type)
+
+  check_tables(flows, districts)
+  calculate_distances(flows, districts)
+  check_codes(flows, districts)
+  fwrite(flows, "./data/FlowDataGermans.csv")
+  fwrite(districts, "./data/districts.csv")
+  message("Data written to disk.")
 }
 
 read_age <- function(file) {
-    dt <- fread(file)
-    data.table::setnames(dt, "age_group", "agegroup")
-    helpeR::rec_ages(dt)
-    return(dt)
+  dt <- fread(file)
+  data.table::setnames(dt, "age_group", "agegroup")
+  helpeR::rec_ages(dt)
+  return(dt)
 }
 
 clean_flows <- function(flows, correct, age_dt, year_min, year_max, topop_type) {
-    age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
-    todist <- frompop <- i.german <- region <- topop <- agegroup <- i.all <- NULL
-    ## in correct_flows we remove year == 2001 and origin %in% c(3201, 3253)
-    flows <- correct_flows(flows, correct)
-    
-    flows <- flows[year >= year_min & year <= year_max & age_group != "all", 
-               .(fromdist = origin, todist = destination, year,
-                 agegroup = age_group, flows = flow)]
-    rec_ages(flows)
-    flows <- add_missing_flows(flows, flows[, unique(fromdist)],
-                               flows[, unique(agegroup)], flows[, unique(year)])
+  age_group <- . <- origin <- destination <- flow <- fromdist <- NULL
+  todist <- frompop <- i.german <- region <- topop <- agegroup <- i.all <- NULL
+  ## in correct_flows we remove year == 2001 and origin %in% c(3201, 3253)
+  flows <- correct_flows(flows, correct)
 
-    ### omitting since all intra-district flows are 0 and this would be
-    ### hard to explain for the model
-    flows <- flows[fromdist != todist]
-    flows <- flows[order(fromdist, todist, year, agegroup)]
-    
-    flows[age_dt, frompop := i.german, on = .(fromdist = region, year, agegroup)]
-    if(topop_type == "agegroup") {
-        flows[age_dt, topop := i.all,
-              on = .(todist = region, year, agegroup)]
-        message("Topop: Population in age group")
-    }
-    if(topop_type == "all") {
-        flows[age_dt[agegroup == "all"], topop := i.all,
-              on = .(todist = region, year)]
-        message("Topop: Total population")
-    }
-    return(flows)
+  flows <- flows[year >= year_min & year <= year_max & age_group != "all",
+                 .(fromdist = origin, todist = destination, year,
+                   agegroup = age_group, flows = flow)]
+  rec_ages(flows)
+  flows <- add_missing_flows(flows, flows[, unique(fromdist)],
+                             flows[, unique(agegroup)], flows[, unique(year)])
+
+### omitting since all intra-district flows are 0 and this would be
+### hard to explain for the model
+  flows <- flows[fromdist != todist]
+  flows <- flows[order(fromdist, todist, year, agegroup)]
+
+  flows[age_dt, frompop := i.german, on = .(fromdist = region, year, agegroup)]
+  if(topop_type == "agegroup") {
+    flows[age_dt, topop := i.all,
+          on = .(todist = region, year, agegroup)]
+    message("Topop: Population in age group")
+  }
+  if(topop_type == "all") {
+    flows[age_dt[agegroup == "all"], topop := i.all,
+          on = .(todist = region, year)]
+    message("Topop: Total population")
+  }
+  return(flows)
 }
 
 gen_coords <- function(dt, type) {
-    pos <- geometry <- xcoord <- ycoord <- NULL
-        if(type == "centroid") {
-        dt[, pos := sf::st_centroid(geometry)]
-    }
-    if(type == "pos") {
-        dt[, pos := sf::st_point_on_surface(geometry)]
-    }
-    dt[, xcoord := st_coordinates(pos)[, 1] / 1e3]
-    dt[, ycoord := st_coordinates(pos)[, 2] / 1e3]
-    return(dt)
+  pos <- geometry <- xcoord <- ycoord <- NULL
+  if(type == "centroid") {
+    dt[, pos := sf::st_centroid(geometry)]
+  }
+  if(type == "pos") {
+    dt[, pos := sf::st_point_on_surface(geometry)]
+  }
+  dt[, xcoord := st_coordinates(pos)[, 1] / 1e3]
+  dt[, ycoord := st_coordinates(pos)[, 2] / 1e3]
+  return(dt)
 }
 
 gen_districts <- function(density, germanpop, shp, year_min, year_max, dist_type) {
-    . <- region <- agegroup <- pop <- i.all <- i.GEN <- i.xcoord <- i.ycoord <- NULL
-    i.bl_ags <- i.bl_name <- AGS <- NULL
-    dt <- density[, .(distcode = region, year, density)]
-    dt[germanpop[agegroup == "all"], pop := i.all, on = .(distcode = region, year)]
-    message("District pop: Germans + Foreigners")
-    gen_coords(shp, dist_type)
-    nc <- c("name", "xcoord", "ycoord", "bl_ags", "bl_name")
-    dt[shp, c(nc) := .(i.GEN, i.xcoord, i.ycoord, i.bl_ags, i.bl_name), on = .(distcode = AGS)]
-    setcolorder(dt, c("distcode", "year", "pop"))
-    dt <- dt[year >= year_min & year <= year_max]
-    return(dt)
+  . <- region <- agegroup <- pop <- i.all <- i.GEN <- i.xcoord <- i.ycoord <- NULL
+  i.bl_ags <- i.bl_name <- AGS <- NULL
+  dt <- density[, .(distcode = region, year, density)]
+  dt[germanpop[agegroup == "all"], pop := i.all, on = .(distcode = region, year)]
+  message("District pop: Germans + Foreigners")
+  gen_coords(shp, dist_type)
+  nc <- c("name", "xcoord", "ycoord", "bl_ags", "bl_name")
+  dt[shp, c(nc) := .(i.GEN, i.xcoord, i.ycoord, i.bl_ags, i.bl_name), on = .(distcode = AGS)]
+  setcolorder(dt, c("distcode", "year", "pop"))
+  dt <- dt[year >= year_min & year <= year_max]
+  return(dt)
 }
 
 check_tables <- function(flows, coords) {
-    fromdist <- todist <- distcode <- . <- name <- xcoord <- ycoord <- NULL
+  fromdist <- todist <- distcode <- . <- name <- xcoord <- ycoord <- NULL
 
-    stopifnot(all(flows[, unique(fromdist)] == flows[order(todist), unique(todist)] ))
-    stopifnot(all(flows[, unique(fromdist)] == coords[, unique(distcode)]))
-    coords[distcode %in% c(5315, 2000, 11000, 14713, 9162, 1001),
-              .(name, xcoord = xcoord, ycoord = ycoord)]
-    coords[, .(min = min(xcoord), max = max(xcoord))]
-    coords[, .(min = min(ycoord), max = max(ycoord))]
+  stopifnot(all(flows[, unique(fromdist)] == flows[order(todist), unique(todist)] ))
+  stopifnot(all(flows[, unique(fromdist)] == coords[, unique(distcode)]))
+  coords[distcode %in% c(5315, 2000, 11000, 14713, 9162, 1001),
+         .(name, xcoord = xcoord, ycoord = ycoord)]
+  coords[, .(min = min(xcoord), max = max(xcoord))]
+  coords[, .(min = min(ycoord), max = max(ycoord))]
 }
 
 calculate_distances <- function(flows, coords) {
-    distcode <- . <- xcoord <- ycoord <- distance <- NULL
-    x_from <- x_to <- y_from <- y_to <- dist <- i.distance <- fromdist <- todist <- NULL
-    
-    regions  <- coords[, unique(distcode)]
-    distances <- CJ(fromdist = regions, todist = regions)
-    distances[coords, c("x_from", "y_from") := .(xcoord, ycoord), on = .(fromdist = distcode)]
-    distances[coords, c("x_to", "y_to") := .(xcoord, ycoord), on = .(todist = distcode)]
-    distances[, distance := sqrt((x_from - x_to)^2 + (y_from - y_to)^2)]
-    flows[distances, dist := as.integer(round(i.distance)), on = .(fromdist, todist)]
-    return(NULL)
+  distcode <- . <- xcoord <- ycoord <- distance <- NULL
+  x_from <- x_to <- y_from <- y_to <- dist <- i.distance <- fromdist <- todist <- NULL
+
+  regions  <- coords[, unique(distcode)]
+  distances <- CJ(fromdist = regions, todist = regions)
+  distances[coords, c("x_from", "y_from") := .(xcoord, ycoord), on = .(fromdist = distcode)]
+  distances[coords, c("x_to", "y_to") := .(xcoord, ycoord), on = .(todist = distcode)]
+  distances[, distance := sqrt((x_from - x_to)^2 + (y_from - y_to)^2)]
+  flows[distances, dist := as.integer(round(i.distance)), on = .(fromdist, todist)]
+  return(NULL)
 }
 
 check_codes <- function(f, d) {
-    . <- fromdist <- distcode <- agegroup <- equal <- NULL
-    test <- f[, .(equal = setequal(unique(fromdist), d[year == .BY$year, distcode])),
-               keyby = .(year, agegroup)]
-##    on.exit(return(test))
-    if(any(test[, ! equal])) {
-        stop("District codes not matched across tables")
-    } else {
-        message("District codes matched across tables for all years.")
-    }
+  . <- fromdist <- distcode <- agegroup <- equal <- NULL
+  test <- f[, .(equal = setequal(unique(fromdist), d[year == .BY$year, distcode])),
+            keyby = .(year, agegroup)]
+  ##    on.exit(return(test))
+  if(any(test[, ! equal])) {
+    stop("District codes not matched across tables")
+  } else {
+    message("District codes matched across tables for all years.")
+  }
 }
 
 ## pop_weighted_distance <- function(districts, municipalities_path, inkar_path) {
