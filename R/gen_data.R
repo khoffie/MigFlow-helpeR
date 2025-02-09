@@ -14,7 +14,7 @@
 ##' @import sf
 ##' @export gen_data
 ##' @author Konstantin
-gen_data <- function(year_min, year_max,
+gen_data <- function(path, year_min, year_max,
                      dist_type = c("centroid", "pos"),
                      topop_type = c("agegroup", "all")) {
   . <- region <- bl_ags <- NULL
@@ -37,8 +37,8 @@ gen_data <- function(year_min, year_max,
   check_tables(flows, districts)
   calculate_distances(flows, districts)
   check_codes(flows, districts)
-  fwrite(flows, "./data/FlowDataGermans.csv")
-  fwrite(districts, "./data/districts.csv")
+  fwrite(flows, file.path(path, "FlowDataGermans.csv"))
+  fwrite(districts, file.path(path, "districts.csv"))
   message("Data written to disk.")
 }
 
