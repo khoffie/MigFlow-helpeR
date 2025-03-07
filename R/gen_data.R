@@ -27,7 +27,7 @@ gen_data <- function(outpath, year_min, year_max,
   p_raw <- "./data/raw"
   p_clean <- "./data/clean"
   flows <- fread(file.path(p_clean, "flows_districts_2000_2017_ger.csv"))
-  germanpop <- read_age(file.path(p_clean, "germanpop.csv"))
+  germanpop <- fread(file.path(p_clean, "germanpop.csv"))
   shp <- setDT(sf::read_sf(file.path(p_clean, "/shapes/districts_ext.shp")))
   density <- data.table::fread(file.path(p_clean, "density.csv"))[
                          , .(region, year, density, bl_ags)]
@@ -43,13 +43,6 @@ gen_data <- function(outpath, year_min, year_max,
   fwrite(flows, file.path(outpath, "FlowDataGermans.csv"))
   fwrite(districts, file.path(outpath, "districts.csv"))
   message("Data written to disk.")
-}
-
-read_age <- function(file) {
-  dt <- fread(file)
-  data.table::setnames(dt, "age_group", "agegroup")
-  helpeR::rec_ages(dt)
-  return(dt)
 }
 
 clean_flows <- function(flows, correct, age_dt, year_min, year_max, topop_type) {
