@@ -90,7 +90,7 @@ read_pop <- function(path, file) {
     ## first linenumbers not part of data
     cond <- ifelse(file == "12411-03-02-4.csv", "184005", "153877")
     cond <- sprintf("Stopped early on line %s", cond)
-    ## at some line the data ends and additional informatino are
+    ## at some line the data ends and additional information are
     ## written in the .csv. We do not want to read those and catch the
     ## warning Stopped early on line ..., such that future users are
     ## not worried. The problem is however, that users may download
