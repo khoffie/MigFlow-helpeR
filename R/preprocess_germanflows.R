@@ -25,7 +25,6 @@ preprocess_germanflows <- function(raw, clean) {
 }
 
 read_and_clean <- function(file) {
-    ## thanks chatGPT!
     file_short <- rev(strsplit(rev(file), "/", fixed = TRUE)[[1]])[1]
     message(sprintf("File %s is being processed", file_short))
     sheets <- readxl::excel_sheets(file)
