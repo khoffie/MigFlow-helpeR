@@ -15,6 +15,7 @@ german_flows <- function(raw, cleanfile) {
     dt <- agegroup_all(dt)
     dt <- swap_od(dt)
     dt <- dt[origin != destination]
+    dt <- rm_lateresettlers(dt)
     fwrite(dt, cleanfile)
     message(sprintf("%s written to disk", cleanfile))
 }
@@ -99,4 +100,15 @@ swap_od <- function(dt) {
     setnames(dt, c("origin", "destination"), c("destination", "origin"))
     setcolorder(dt, c("origin", "destination"))
     return(dt)
+}
+
+rm_lateresettlers <- function(dt) {
+  fromdist <- year <- NULL
+  dt <- dt[! (fromdist == 3159 & year <= 2005)] ## Göttingen
+  dt <- dt[! (fromdist == 3459 & year == 2000)] ## Osnabrück Kreis
+  dt <- dt[! (fromdist == 8237 & year == 2000)] ## Freudenstadt
+  ## Unna, second-order effects, because many from Göttingen and
+  ## Osnabrück-Kreis moved there
+  dt <- dt[! (fromdist == 5978 & year <= 20005)]
+  return(dt)
 }
