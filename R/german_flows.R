@@ -104,11 +104,17 @@ swap_od <- function(dt) {
 
 rm_lateresettlers <- function(dt) {
   fromdist <- year <- NULL
-  dt <- dt[! (fromdist == 3159 & year <= 2005)] ## Göttingen
-  dt <- dt[! (fromdist == 3459 & year == 2000)] ## Osnabrück Kreis
-  dt <- dt[! (fromdist == 8237 & year == 2000)] ## Freudenstadt
+  dt2 <- dt[! (fromdist == 3159 & year <= 2005)] ## Göttingen
+  dt2 <- dt2[! (fromdist == 3459 & year == 2000)] ## Osnabrück Kreis
+  dt2 <- dt2[! (fromdist == 8237 & year == 2000)] ## Freudenstadt
   ## Unna, second-order effects, because many from Göttingen and
   ## Osnabrück-Kreis moved there
-  dt <- dt[! (fromdist == 5978 & year <= 20005)]
-  return(dt)
+  dt2 <- dt2[! (fromdist == 5978 & year <= 2005)]
+
+  Nrm <- 400*5*6 + 400*6 + 400*6 + 400*5*6
+  if(nrow(dt) - nrow(dt2) != Nrm) {
+    stop("Wrong number of rows")
+  }
+  message("Removed flows related to German late resettlers.")
+  return(dt2)
 }
