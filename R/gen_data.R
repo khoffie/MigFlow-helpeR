@@ -140,6 +140,49 @@ check_codes <- function(f, d) {
   }
 }
 
+##' Appends missing rows to flow data
+##'
+##' Flow data obtained from the federal statistical office only has
+##' rows if flows are > 0. add_missing_flows adds rows that are
+##' missing and sets flows for those rows to 0.
+##' @param flows data.table with flows
+##' @param regions character, unique regions
+##' @param agegroups character, unique agegroups
+##' @param years numeric, unique years
+##' @return flow data.table with missing rows
+##' @import data.table
+##' @export add_missing_flows
+##' @author Konstantin Hoffie
+add_missing_flows <- function(flows, regions, agegroups, years) {
+    ### in flows data all 0 flows are missing. We add them now to make
+    ### sure all origins have the same destinations for all age groups and
+### vice versa
+    all_keys <- data.table::CJ(fromdist = regions,
+                   todist = regions,
+                   agegroup = agegroups,
+                   year = years)
+    data.table::setkeyv(all_keys, colnames(all_keys))
+    data.table::setkeyv(flows, colnames(all_keys))
+    flows <- flows[all_keys]
+    flows[is.na(flows), flows := 0]
+    return(flows)
+}
+
+##' Recodes German agegroups to English
+##'
+##' @param dt data.table
+##' @return NULL
+##' @import data.table
+##' @export rec_ages
+##' @author Konstantin Hoffie
+rec_ages <- function(dt) {
+  agegroup <- i.new <- . <- old <- NULL
+  lbls <- data.table::data.table(old = c("unter18", "\u00fcber65"),
+                     new = c("below18", "above65"))
+  dt[lbls, agegroup := i.new, on = .(agegroup = old)]
+  return(NULL)
+}
+
 ## pop_weighted_distance <- function(districts, municipalities_path, inkar_path) {
 ##     gen_munis <- function() {
 ##         munis <- setDT(sf::read_sf(municipalities_file))[year == 2017]
