@@ -1,12 +1,12 @@
-##' Preprocesses unipped raw flow tables
-##'
-##' @param raw path raw data
-##' @param clean path clean data
-##' @return NULL, writes to disk
-##' @import data.table
-##' @import readxl
-##' @export preprocess_germanflows
-##' @author Konstantin
+#' Preprocesses unipped raw flow tables
+#'
+#' @param raw path raw data
+#' @param clean path clean data
+#' @return NULL, writes to disk
+#' @import data.table
+#' @import readxl
+#' @export
+#' @author Konstantin
 preprocess_germanflows <- function(raw, clean) {
     files <- list.files(raw)
     ## omit years before 2000
