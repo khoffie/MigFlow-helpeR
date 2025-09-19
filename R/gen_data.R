@@ -191,6 +191,7 @@ replace_lateresettlers <- function(dt) {
   replace_with_average(dt, 8237, 2000)
   replace_with_average(dt, 5978, 2000:2005)
   message("Replaced flows related to German late resettlers with average 2007-2009.")
+  return(dt)
 }
 
 replace_with_average <- function(dt, origin, years) {
