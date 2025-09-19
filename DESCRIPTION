@@ -4,9 +4,7 @@ Version: 0.0.3.0
 Authors@R:
     person("Konstantin", "Hoffie", , "konstantin.hoffie@web.de", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: The package preprocess the raw data. The raw data are
-.xlsx files. The data is read, cleaned, column names and values are
-standardized and problematic data is removed.
+Description: The package preprocess the raw data. The raw data are .xlsx files. The data is read, cleaned, column names and values are standardized and problematic data is removed.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
