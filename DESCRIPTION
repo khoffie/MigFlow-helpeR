@@ -1,22 +1,18 @@
 Package: helpeR
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.2.4
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+Title: Preprocesses raw data for German migration project
+Version: 0.0.3.0
+Authors@R:
+    person("Konstantin", "Hoffie", , "konstantin.hoffie@web.de", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: The package preprocess the raw data. The raw data are
+.xlsx files. The data is read, cleaned, column names and values are
+standardized and problematic data is removed.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: tinytest
-Imports: 
+Imports:
     data.table,
-    ggplot2,
-    tinytex,
-    bookdown,
     sf,
-    patchwork,
-    ggthemes,
-    ggtext,
     readxl
