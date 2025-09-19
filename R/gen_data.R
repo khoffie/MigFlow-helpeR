@@ -34,13 +34,13 @@ gen_data <- function(outpath, year_min, year_max,
   correct <- data.table::fread(file.path(p_clean, "correct.csv"))
 
   flows <- clean_flows(flows, correct, germanpop, year_min, year_max, topop_type)
+  flows <- replace_lateresettlers(flows)
   districts <- gen_districts(density, germanpop, shp, year_min, year_max,
                              dist_type = dist_type)
 
   check_tables(flows, districts)
   calculate_distances(flows, districts)
   check_codes(flows, districts)
-  flows <- rm_lateresettlers(flows)
   fwrite(flows, file.path(outpath, "FlowDataGermans.csv"))
   fwrite(districts, file.path(outpath, "districts.csv"))
   message("Data written to disk.")
@@ -184,22 +184,24 @@ rec_ages <- function(dt) {
   return(NULL)
 }
 
-rm_lateresettlers <- function(dt) {
+replace_lateresettlers <- function(dt) {
   fromdist <- year <- NULL
-  dt2 <- dt[! (fromdist == 3159 & year <= 2005)] ## Göttingen
-  dt2 <- dt2[! (fromdist == 3459 & year == 2000)] ## Osnabrück Kreis
-  dt2 <- dt2[! (fromdist == 8237 & year == 2000)] ## Freudenstadt
-  ## Unna, second-order effects, because many from Göttingen and
-  ## Osnabrück-Kreis moved there
-  dt2 <- dt2[! (fromdist == 5978 & year <= 2005)]
-
-  Nrm <- 400*5*6 + 400*6 + 400*6 + 400*5*6
-  if(nrow(dt) - nrow(dt2) != Nrm) {
-    stop("Wrong number of rows")
-  }
-  message("Removed flows related to German late resettlers.")
-  return(dt2)
+  replace_with_average(dt, 3159, 2000:2005)
+  replace_with_average(dt, 3459, 2000)
+  replace_with_average(dt, 8237, 2000)
+  replace_with_average(dt, 5978, 2000:2005)
+  message("Replaced flows related to German late resettlers with average 2007-2009.")
 }
+
+replace_with_average <- function(dt, origin, years) {
+  fromdist <- flows <- todist <- agegroup <- year <- i.flows <- . <- NULL
+  dt2 <- dt[year %in% c(2006, 2007, 2008)]
+  dtavg <- dt2[fromdist == origin, .(flows = int(mean(flows))), keyby = .(fromdist, todist, agegroup)]
+  dtavg <- dtavg[, .(year = years), by = .(fromdist, todist, agegroup, flows)]
+  dt[dtavg, on = .(fromdist, todist, agegroup, year), flows := i.flows]
+}
+
+int <- function(x) { as.integer(round(x, 0)) }
 
 ## pop_weighted_distance <- function(districts, municipalities_path, inkar_path) {
 ##     gen_munis <- function() {
