@@ -40,6 +40,7 @@ gen_data <- function(outpath, year_min, year_max,
   check_tables(flows, districts)
   calculate_distances(flows, districts)
   check_codes(flows, districts)
+  flows <- rm_lateresettlers(flows)
   fwrite(flows, file.path(outpath, "FlowDataGermans.csv"))
   fwrite(districts, file.path(outpath, "districts.csv"))
   message("Data written to disk.")
@@ -181,6 +182,23 @@ rec_ages <- function(dt) {
                      new = c("below18", "above65"))
   dt[lbls, agegroup := i.new, on = .(agegroup = old)]
   return(NULL)
+}
+
+rm_lateresettlers <- function(dt) {
+  fromdist <- year <- NULL
+  dt2 <- dt[! (fromdist == 3159 & year <= 2005)] ## Göttingen
+  dt2 <- dt2[! (fromdist == 3459 & year == 2000)] ## Osnabrück Kreis
+  dt2 <- dt2[! (fromdist == 8237 & year == 2000)] ## Freudenstadt
+  ## Unna, second-order effects, because many from Göttingen and
+  ## Osnabrück-Kreis moved there
+  dt2 <- dt2[! (fromdist == 5978 & year <= 2005)]
+
+  Nrm <- 400*5*6 + 400*6 + 400*6 + 400*5*6
+  if(nrow(dt) - nrow(dt2) != Nrm) {
+    stop("Wrong number of rows")
+  }
+  message("Removed flows related to German late resettlers.")
+  return(dt2)
 }
 
 ## pop_weighted_distance <- function(districts, municipalities_path, inkar_path) {
