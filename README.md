@@ -22,4 +22,5 @@ The package does the following things:
    removed.
  - A .csv of age group specific population of Germans in districts is
    created.
- -  
+ - In all tables leading zeros of AGS (regional identifiers,
+   "Amtlicher Gemeindeschlüssel") are removed
